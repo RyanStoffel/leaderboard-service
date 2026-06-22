@@ -15,10 +15,23 @@ public static class Glicko2Calculator
         double sum = 0.0;
         foreach (var r in results)
         {
-           double e = E(mu, r.OpponentMu, r.OpponentPhi);
-           double g = G(r.OpponentPhi);
-           sum += g * g * e * (1.0 - e);
+            double e = E(mu, r.OpponentMu, r.OpponentPhi);
+            double g = G(r.OpponentPhi);
+            sum += g * g * e * (1.0 - e);
         }
         return 1.0 / sum;
+    }
+
+    public static double Delta(double mu, IReadOnlyList<MatchResult> results)
+    {
+        double v = V(mu, results);
+        double sum = 0.0;
+        foreach (var r in results)
+        {
+            double e = E(mu, r.OpponentMu, r.OpponentPhi);
+            double g = G(r.OpponentPhi);
+            sum += g * (r.Score - e);
+        }
+        return v * sum;
     }
 }

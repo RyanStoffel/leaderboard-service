@@ -43,4 +43,19 @@ public class Glicko2CalculatorTests
         var v = Glicko2Calculator.V(mu, results);
         Assert.Equal(1.7785, v, 0.001);
     }
+
+    [Fact]
+    public void Delta_MatchesGlickmanExample()
+    {
+        var mu = Mu(1500.0);
+        var results = new List<MatchResult>
+        {
+            new(Mu(1400.0), Phi(30.0), 1.0),
+            new(Mu(1550.0), Phi(100.0), 0.0),
+            new(Mu(1700.0), Phi(300.0), 0.0),
+        };
+
+        var delta = Glicko2Calculator.Delta(mu, results);
+        Assert.Equal(-0.4834, delta, 0.001);
+    }
 }

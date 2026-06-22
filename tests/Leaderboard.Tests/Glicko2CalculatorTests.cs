@@ -78,4 +78,33 @@ public class Glicko2CalculatorTests
 
         Assert.Equal(0.05999, sigmaPrime, 0.0001);
     }
+
+    [Fact]
+    public void Update_MatchesGlickmanFullExample()
+    {
+        var player = new Glicko2Rating(1500.0, 200.0, 0.06);
+        var results = new List<MatchResult>
+        {
+            new(Mu(1400.0), Phi(30.0), 1.0),
+            new(Mu(1550.0), Phi(100.0), 0.0),
+            new(Mu(1700.0), Phi(300.0), 0.0),
+        };
+
+        var updated = Glicko2Calculator.Update(player, results, tau: 0.5);
+
+        Assert.Equal(1464.06, updated.Rating, 0.1);
+        Assert.Equal(151.52, updated.RatingDeviation, 0.1);
+        Assert.Equal(0.05999, updated.Volatility, 0.0001);
+    }
+
+    [Fact]
+    public void Update_NoGames_InflatesRdOnly()
+    {
+        var player = new Glicko2Rating(1500.0, 200.0, 0.06);
+        var updated = Glicko2Calculator.Update(player, new List<MatchResult>(), tau: 0.5);
+
+        Assert.Equal(1500.0, updated.Rating, 0.0001);
+        Assert.Equal(0.06, updated.Volatility, 0.0001);
+        Assert.True(updated.RatingDeviation > 200.0);
+    }
 }

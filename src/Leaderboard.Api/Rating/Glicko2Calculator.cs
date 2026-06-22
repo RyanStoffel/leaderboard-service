@@ -98,4 +98,36 @@ public static class Glicko2Calculator
 
         return Math.Exp(A / 2.0);
     }
+
+    public static Glicko2Rating Update(
+        Glicko2Rating player,
+        IReadOnlyList<MatchResult> results,
+        double tau = 0.5)
+    {
+        if (results.Count == 0)
+        {
+            double phiStarOnly = Math.Sqrt(player.Phi * player.Phi + player.Volatility * player.Volatility);
+            return Glicko2Rating.FromInternal(player.Mu, phiStarOnly, player.Volatility);
+        }
+
+        double mu = player.Mu;
+        double phi = player.Phi;
+        double sigma = player.Volatility;
+
+        double v = V(mu, results);
+        double delta = Delta(mu, results);
+        double sigmaPrime = Volatility(phi, v, delta, sigma, tau);
+
+        double phiStar = Math.Sqrt(phi * phi + sigmaPrime * sigmaPrime);
+        double phiPrime = 1.0 / Math.Sqrt(1.0 / (phiStar * phiStar) + 1.0 / v);
+
+        double sum = 0.0;
+        foreach (var r in results)
+        {
+            sum += G(r.OpponentPhi) * (r.Score - E(mu, r.OpponentMu, r.OpponentPhi));
+        }
+        double muPrime = mu + phiPrime * phiPrime * sum;
+
+        return Glicko2Rating.FromInternal(muPrime, phiPrime, sigmaPrime);
+    }
 }

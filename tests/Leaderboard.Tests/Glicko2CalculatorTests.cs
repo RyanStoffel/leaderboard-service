@@ -28,4 +28,19 @@ public class Glicko2CalculatorTests
         var result = Glicko2Calculator.E(playerMu, Mu(opponentRating), Phi(opponentRd));
         Assert.Equal(expected, result, precision: 3);
     }
+
+    [Fact]
+    public void V_MatchesGlickmanExample()
+    {
+        var mu = Mu(1500.0);
+        var results = new List<MatchResult>
+        {
+            new(Mu(1400.0), Phi(30.0), 1.0),
+            new(Mu(1550.0), Phi(100.0), 0.0),
+            new(Mu(1700.0), Phi(300.0), 0.0),
+        };
+
+        var v = Glicko2Calculator.V(mu, results);
+        Assert.Equal(1.7785, v, 0.001);
+    }
 }

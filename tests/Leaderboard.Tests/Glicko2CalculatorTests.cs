@@ -58,4 +58,24 @@ public class Glicko2CalculatorTests
         var delta = Glicko2Calculator.Delta(mu, results);
         Assert.Equal(-0.4834, delta, 0.001);
     }
+
+    [Fact]
+    public void Volatility_MatchesGlickmanExample()
+    {
+        var mu = Mu(1500.0);
+        var phi = Phi(200.0);
+        var results = new List<MatchResult>
+        {
+            new(Mu(1400.0), Phi(30.0), 1.0),
+            new(Mu(1550.0), Phi(100.0), 0.0),
+            new(Mu(1700.0), Phi(300.0), 0.0),
+        };
+
+        var v = Glicko2Calculator.V(mu, results);
+        var delta = Glicko2Calculator.Delta(mu, results);
+
+        var sigmaPrime = Glicko2Calculator.Volatility(phi, v, delta, 0.06, 0.5);
+
+        Assert.Equal(0.05999, sigmaPrime, 0.0001);
+    }
 }

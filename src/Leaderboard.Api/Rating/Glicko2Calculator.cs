@@ -34,4 +34,68 @@ public static class Glicko2Calculator
         }
         return v * sum;
     }
+
+    public static double Volatility(
+        double phi,
+        double v,
+        double delta,
+        double sigma,
+        double tau)
+    {
+        double a = Math.Log(sigma * sigma);
+
+        double F(double x)
+        {
+            double ex = Math.Exp(x);
+            double num = ex * (delta * delta - phi * phi - v - ex);
+            double den = 2.0 * Math.Pow(phi * phi + v + ex, 2);
+            return (num / den) - ((x - a) / (tau * tau));
+        }
+
+        double A = a;
+        double B;
+
+        double delta2 = delta * delta;
+        double phi2v = phi * phi + v;
+
+        if (delta2 > phi2v)
+        {
+            B = Math.Log(delta2 - phi2v);
+        }
+        else
+        {
+            double k = 1.0;
+            while (F(a - k * tau) < 0.0)
+            {
+                k += 1.0;
+            }
+            B = a - k * tau;
+        }
+
+        double fA = F(A);
+        double fB = F(B);
+
+        const double epsilon = 0.000001;
+
+        while (Math.Abs(B - A) > epsilon)
+        {
+            double C = A + (A - B) * fA / (fB - fA);
+            double fC = F(C);
+
+            if (fC * fB <= 0.0)
+            {
+                A = B;
+                fA = fB;
+            }
+            else
+            {
+                fA = fA / 2.0;
+            }
+
+            B = C;
+            fB = fC;
+        }
+
+        return Math.Exp(A / 2.0);
+    }
 }
